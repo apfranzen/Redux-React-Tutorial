@@ -1,43 +1,36 @@
-import { applyMiddleware, createStore } from "redux";
-import axios from "axios";
-import logger from "redux-logger";
-import thunk from "redux-thunk";
-import promise from "redux-promise-middleware";
+import { combineReducers, createStore } from "redux";
 
-const initialState = {
-  fetching: false,
-  fetched: false,
-  users: [],
-  error: null,
-};
-
-const reducer = (state=initialState, action) => {
-  switch (action.type) {
-    case "FETCH_USERS_PENDING": {
-      return {...state, fetching: true}
+const userReducer = (state={}, action) => {
+  switch(action.type) {
+    case "CHANGE_NAME": {
+      state = {...state, name: action.payload};
       break;
     }
-    case "FETCH_USERS_REJECTED": {
-      return {...state, fetching: false, error: action.payload}
-      break;
-    }
-    case "FETCH_USERS_FULFILLED": {
-      return {
-        ...state,
-        fetching: false,
-        fetched: true,
-        users: action.payload,
-      }
+    case "CHANGE_AGE": {
+      state = {...state, age: action.payload};
       break;
     }
   }
-  return state
+  return state;
 }
 
-const middleware = applyMiddleware(promise(), thunk, logger())
-const store = createStore(reducer, middleware)
+const tweetsReducer = (state=[], actions) => {
+  return state;
+}
 
-store.dispatch({
-  type: "FETCH_USERS",
-  payload: axios.get("http://rest.learncode.academy/api/wstern/users")
+const reducers = combineReducers({
+  user: userReducer,
+  tweets: tweetsReducer,
 })
+
+const store = createStore(reducers);
+
+store.subscribe(() => {
+  console.log('store changed', store.getState());
+})
+
+// store.dispatch({type: "CHANGE_NAME", payload: "Joe"})
+// store.dispatch({type: "CHANGE_AGE", payload: 35})
+store.dispatch({type: "CHANGE_NAME", payload: 'Adam'})
+store.dispatch({type: "CHANGE_AGE", payload: 29})
+store.dispatch({type: "CHANGE_AGE", payload: 39})
